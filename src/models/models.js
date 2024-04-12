@@ -303,6 +303,10 @@ export const Report = sequelize.define('Report', {
     public: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
+    },
+    confidential: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
 });
 
