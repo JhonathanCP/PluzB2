@@ -11,15 +11,15 @@ export const User = sequelize.define('User', {
     },
     firstname: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     lastname: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     dni: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     email: {
         type: DataTypes.STRING,
@@ -263,7 +263,7 @@ export const Group = sequelize.define('Group', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    public: {
+    free: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     }
@@ -296,7 +296,7 @@ export const Module = sequelize.define('Module', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    public: {
+    free: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     }
@@ -337,7 +337,7 @@ export const Report = sequelize.define('Report', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    public: {
+    free: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
