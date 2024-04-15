@@ -1,5 +1,6 @@
 import {Role} from "../models/models.js";
 import {User} from "../models/models.js";
+import { State } from "../models/models.js";
 import { ADMIN_EMAIL, ADMIN_USERNAME, ADMIN_PASSWORD } from "../config.js";
 
 export const createRoles = async () => {
@@ -22,6 +23,27 @@ export const createRoles = async () => {
     }
 };
 
+export const createStates = async () => {
+    try {
+        // Count Rows
+        const count = await State.count();
+
+        // Check for existing roles
+        if (count > 0) return;
+
+        // Create default Roles
+        const values = await Promise.all([
+            State.create({ name: "PENDIENTE DE FIRMA" }),
+            State.create({ name: "POR REVISAR" }),
+            State.create({ name: "APROBADO" }),
+            State.create({ name: "DENEGADO" })
+        ]);
+
+        console.log(values);
+    } catch (error) {
+        console.error(error);
+    }
+};
 
 export const createAdmin = async () => {
     try {

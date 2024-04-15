@@ -61,7 +61,15 @@ export const LoginAudit = sequelize.define('LoginAudit', {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
-    ip: {
+    publicIp: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    privateIp: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    system: {
         type: DataTypes.STRING,
         allowNull: false
     }
@@ -76,7 +84,15 @@ export const AccessAudit = sequelize.define('AccessAudit', {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
-    ip: {
+    publicIp: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    privateIp: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    system: {
         type: DataTypes.STRING,
         allowNull: false
     }
@@ -93,6 +109,19 @@ export const Role = sequelize.define('Role', {
         defaultValue: true
     }
 });
+
+// Definir el modelo State
+export const State = sequelize.define('State', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+});
+
 
 // Definir el modelo Dependency
 export const MainDependency = sequelize.define('MainDependency', {
@@ -171,6 +200,10 @@ export const AccessRequest = sequelize.define('AccessRequest', {
     estado: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    message: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 });
 
@@ -196,6 +229,10 @@ export const ImplementationRequest = sequelize.define('ImplementationRequest', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         onUpdate: DataTypes.NOW
+    },
+    message: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 });
 
@@ -310,6 +347,36 @@ export const Report = sequelize.define('Report', {
     }
 });
 
+// Definir el modelo Report
+export const Notification = sequelize.define('Notification', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    },
+    link: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    opened: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
+    openedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        onUpdate: DataTypes.NOW
+    }
+});
+
+
 
 // Sequelize hooks for password encryption
 User.beforeCreate(async (user) => {
@@ -338,8 +405,14 @@ User.prototype.authenticateLDAP = function () {
 };
 
 // Definir las relaciones
+AccessRequest.belongsTo(State);
+State.hasMany(AccessRequest);
+
 AccessRequest.belongsTo(User);
 User.hasMany(AccessRequest);
+
+ImplementationRequest.belongsTo(State);
+State.hasMany(ImplementationRequest);
 
 ImplementationRequest.belongsTo(User);
 User.hasMany(ImplementationRequest);
@@ -352,6 +425,9 @@ MainDependency.hasMany(Dependency);
 
 User.belongsTo(Dependency);
 Dependency.hasMany(User);
+
+Notification.belongsTo(User);
+User.hasMany(Notification);
 
 User.belongsToMany(Group, { through: 'UserGroup' });
 Group.belongsToMany(User, { through: 'UserGroup' });
