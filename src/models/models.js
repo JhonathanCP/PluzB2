@@ -441,10 +441,20 @@ Report.belongsToMany(User, { through: 'UserReport' });
 AccessRequest.belongsToMany(Report, { through: 'AccessRequestReport' });
 Report.belongsToMany(AccessRequest, { through: 'AccessRequestReport' });
 
-Module.belongsTo(Group);
+Module.belongsTo(Group, { 
+    foreignKey: {
+        allowNull: false
+    },
+    required: true
+});
 Group.hasMany(Module);
 
-Report.belongsTo(Module);
+Report.belongsTo(Module, { 
+    foreignKey: {
+        allowNull: false
+    },
+    required: true
+});
 Module.hasMany(Report);
 
 LoginAudit.belongsTo(User);
