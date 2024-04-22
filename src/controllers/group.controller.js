@@ -1,4 +1,4 @@
-import { Group } from '../models/models.js';
+import { Group, Module, Report } from "../models/models.js";
 
 // Obtener todos los grupos
 export const getAllGroups = async (req, res) => {
@@ -82,5 +82,26 @@ export const deleteGroup = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al eliminar el grupo" });
+    }
+};
+
+export const getGroupsByFreeReport = async (req, res) => {
+    try {
+        const groups = await Group.findAll({
+            include: {
+                model: Module,
+                include: {
+                    model: Report,
+                    where: { free: true }, // Solo se incluirán los reportes con campo free true
+                    required: true // Asegura que solo se incluyan los módulos con al menos un reporte free
+                }
+            }
+        });
+        // Filtrar los grupos que tienen al menos un módulo con al menos un reporte free
+        const filteredGroups = groups.filter(group => group.Modules.length > 0);
+        res.status(200).json(filteredGroups);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };

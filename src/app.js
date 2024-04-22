@@ -4,6 +4,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import {createRoles, createAdmin, createStates} from "./middlewares/initialSetup.js"
 import authRouter from "./routes/auth.routes.js"
+import userRouter from "./routes/user.routes.js";
 import groupRouter from "./routes/group.routes.js"
 import moduleRouter from "./routes/module.routes.js"
 import reportRouter from "./routes/report.routes.js"
@@ -22,6 +23,7 @@ app.use(helmet());
 app.use(morgan('dev'));
 
 app.use('/auth', authRouter)
+app.use('/user', userRouter)
 app.use('/group', groupRouter)
 app.use('/module', moduleRouter)
 app.use('/report', reportRouter)

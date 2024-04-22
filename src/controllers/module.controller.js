@@ -1,4 +1,4 @@
-import { Module } from '../models/models.js';
+import { Module, Report } from "../models/models.js";
 
 // Obtener todos los modulos
 export const getAllModules = async (req, res) => {
@@ -84,5 +84,21 @@ export const deleteModule = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al eliminar el modulo" });
+    }
+};
+
+export const getModulesByFreeReport = async (req, res) => {
+    try {
+        const modules = await Module.findAll({
+            include: {
+                model: Report,
+                where: { free: true },
+                required: true // Asegura que solo se incluyan los módulos con al menos un reporte free
+            }
+        });
+        res.status(200).json(modules);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };

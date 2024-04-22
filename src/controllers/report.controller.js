@@ -92,3 +92,15 @@ export const deleteReport = async (req, res) => {
         res.status(500).json({ message: "Error al eliminar el reporte" });
     }
 };
+
+export const getReportsByFreeReport = async (req, res) => {
+    try {
+        const reports = await Report.findAll({
+            where: { free: true }
+        });
+        res.status(200).json(reports);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
