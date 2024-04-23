@@ -8,6 +8,8 @@ import userRouter from "./routes/user.routes.js";
 import groupRouter from "./routes/group.routes.js"
 import moduleRouter from "./routes/module.routes.js"
 import reportRouter from "./routes/report.routes.js"
+import notificationRouter from "./routes/notification.routes.js";
+import accessRequestRouter from "./routes/accessrequet.routes.js";
 
 const app = express();
 createRoles();
@@ -27,5 +29,7 @@ app.use('/user', userRouter)
 app.use('/group', groupRouter)
 app.use('/module', moduleRouter)
 app.use('/report', reportRouter)
+app.use('/notification', notificationRouter)
+app.use('/accessrequest', accessRequestRouter)
 
 export default app;

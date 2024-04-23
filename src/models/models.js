@@ -197,10 +197,6 @@ export const AccessRequest = sequelize.define('AccessRequest', {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
-    estado: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     message: {
         type: DataTypes.STRING,
         allowNull: true
@@ -353,9 +349,13 @@ export const Notification = sequelize.define('Notification', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    shortDescription: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     description: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -363,11 +363,11 @@ export const Notification = sequelize.define('Notification', {
     },
     link: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     opened: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true
+        defaultValue: false
     },
     openedAt: {
         type: DataTypes.DATE,
