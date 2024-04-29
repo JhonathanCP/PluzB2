@@ -9,7 +9,7 @@ accessRequestRouter.get('/:id', [verifyToken, isAdmin], getAccessRequestById);
 accessRequestRouter.post('/', [verifyToken, isAdmin], createAccessRequest);
 accessRequestRouter.put('/:id', [verifyToken, isAdmin],updateAccessRequest);
 accessRequestRouter.delete('/:id', [verifyToken, isAdmin],deleteAccessRequest);
-accessRequestRouter.post('/:id/uploadpdf', [verifyToken, isAdmin], uploadPdfMiddleware, uploadPdfForAccessRequest);
-accessRequestRouter.post('/:id/pdf', [verifyToken, isAdmin], getPdfById);
+accessRequestRouter.post('/:id/pdf', [verifyToken, isAdmin], uploadPdfMiddleware, uploadPdfForAccessRequest);
+accessRequestRouter.get('/:id/pdf',  getPdfById);
 
 export default accessRequestRouter;

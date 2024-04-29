@@ -2,7 +2,10 @@ import { AccessRequest, State } from "../models/models.js";
 import multer from 'multer';
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: {limits: 10 * 1024 * 1024}
+});
 
 // Obtener todas las solicitudes de acceso
 export const getAllAccessRequests = async (req, res) => {
@@ -150,7 +153,7 @@ export const denyAccessRequest = async (req, res) => {
 // Subir el archivo PDF para una solicitud de acceso existente
 export const uploadPdfForAccessRequest = async (req, res) => {
     const { id } = req.params;
-    const pdfBlob = req.file; // Suponiendo que el archivo PDF se envía en req.file
+    const pdfBlob = req.file.buffer; // Suponiendo que el archivo PDF se envía en req.file
 
     try {
         // Verificar si se proporcionó un archivo PDF
@@ -225,17 +228,17 @@ export const getPdfById = async (req, res) => {
             return res.status(404).json({ message: "PDF no encontrado para esta solicitud de acceso" });
         }
 
-        // Aquí puedes enviar el PDF como respuesta
-        // Por ejemplo, si el pdfBlob contiene el archivo en formato de bytes, puedes enviarlo así:
-        // res.setHeader('Content-Type', 'application/pdf');
-        // res.send(accessRequest.pdfBlob);
+        // Configurar el encabezado Content-Type para indicar que estás enviando un archivo PDF
+        res.setHeader('Content-Type', 'application/pdf');
 
-        // En este ejemplo, enviamos un mensaje indicando que el PDF se encontró correctamente
-        res.json({ message: "PDF encontrado para la solicitud de acceso" });
+        // Enviar el contenido del PDF como el cuerpo de la respuesta
+        res.send(accessRequest.pdfBlob);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al obtener el PDF para la solicitud de acceso" });
     }
 };
+
+
 // Aplicar el middleware de multer para manejar la carga de archivos
 export const uploadPdfMiddleware = upload.single('pdfBlob');

@@ -335,11 +335,15 @@ export const Report = sequelize.define('Report', {
     },
     free: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true
+        defaultValue: false
     },
-    confidential: {
+    limited: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true
+        defaultValue: false
+    },
+    restricted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 });
 

@@ -27,7 +27,7 @@ export const getReportById = async (req, res) => {
 };
 
 export const createReport = async (req, res) => {
-    const { name, description, version, icon, link, free, confidential, ModuleId } = req.body;
+    const { name, description, version, icon, link, free, limited, restricted, ModuleId } = req.body;
     try {
         const newReport = await Report.create({
             name,
@@ -36,6 +36,8 @@ export const createReport = async (req, res) => {
             icon,
             link,
             free,
+            limited,
+            restricted,
             confidential,
             ModuleId
         });
