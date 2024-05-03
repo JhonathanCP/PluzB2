@@ -38,7 +38,6 @@ export const createReport = async (req, res) => {
             free,
             limited,
             restricted,
-            confidential,
             ModuleId
         });
 

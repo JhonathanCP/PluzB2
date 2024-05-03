@@ -192,48 +192,139 @@ export const addAllData = async (req, res) => {
     }
 };
 
+// Controlador para obtener los grupos asignados a un usuario específico y los grupos que tienen al menos un reporte gratuito
 export const getGroupsByUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findByPk(id, { include: Group });
         
+        // Obtener los grupos asignados al usuario
+        const user = await User.findByPk(id, { include: Group });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+        const userGroups = user.Groups;
 
-        res.json({ groups: user.Groups });
+        // Obtener los grupos que tienen al menos un reporte gratuito
+        const groupsWithFreeReport = await Group.findAll({
+            include: {
+                model: Module,
+                include: {
+                    model: Report,
+                    where: { free: true }, // Solo se incluirán los reportes con campo free true
+                    required: true // Asegura que solo se incluyan los módulos con al menos un reporte free
+                }
+            }
+        });
+
+        const filteredGroupsWithFreeReport = groupsWithFreeReport.filter(group => group.Modules.length > 0);
+
+        // Array temporal para almacenar los grupos únicos
+        const uniqueGroups = [];
+
+        // Agregar grupos asignados al usuario
+        userGroups.forEach(group => {
+            if (!uniqueGroups.some(g => g.id === group.id)) {
+                uniqueGroups.push(group);
+            }
+        });
+
+        // Agregar grupos con al menos un reporte gratuito
+        filteredGroupsWithFreeReport.forEach(group => {
+            if (!uniqueGroups.some(g => g.id === group.id)) {
+                uniqueGroups.push(group.toJSON()); // Convertir el objeto Sequelize a JSON
+            }
+        });
+
+        res.json({ groups: uniqueGroups });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 export const getModulesByUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findByPk(id, { include: Module });
         
+        // Obtener los módulos asignados al usuario
+        const user = await User.findByPk(id, { include: Module });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+        const userModules = user.Modules;
 
-        res.json({ modules: user.Modules });
+        // Obtener los módulos que tienen al menos un reporte gratuito
+        const modulesWithFreeReport = await Module.findAll({
+            include: {
+                model: Report,
+                where: { free: true },
+                required: true // Solo se incluirán los reportes con campo free true
+            }
+        });
+
+        const filteredModulesWithFreeReport = modulesWithFreeReport.filter(module => module.Reports.length > 0);
+
+        // Array temporal para almacenar los grupos únicos
+        const uniqueModules = [];
+
+        // Agregar grupos asignados al usuario
+        userModules.forEach(module => {
+            if (!uniqueModules.some(m => m.id === module.id)) {
+                uniqueModules.push(module);
+            }
+        });
+
+        // Agregar grupos con al menos un reporte gratuito
+        filteredModulesWithFreeReport.forEach(module => {
+            if (!uniqueModules.some(m => m.id === module.id)) {
+                uniqueModules.push(module.toJSON()); // Convertir el objeto Sequelize a JSON
+            }
+        });
+
+        res.json({ modules: uniqueModules });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
 
+
 export const getReportsByUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findByPk(id, { include: Report });
         
+        // Obtener los reportes asignados al usuario
+        const user = await User.findByPk(id, { include: Report });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+        const userReports = user.Reports;
 
-        res.json({ reports: user.Reports });
+        // Obtener los reportes que tienen el campo 'free' en true
+        const reportsWithFree = await Report.findAll({
+            where: { free: true },
+            required: true
+        });
+
+        // Array temporal para almacenar los reportes únicos
+        const uniqueReports = [];
+
+        // Agregar reportes asignados al usuario
+        userReports.forEach(report => {
+            if (!uniqueReports.some(r => r.id === report.id)) {
+                uniqueReports.push(report);
+            }
+        });
+
+        // Agregar reportes con el campo 'free' en true
+        reportsWithFree.forEach(report => {
+            if (!uniqueReports.some(r => r.id === report.id)) {
+                uniqueReports.push(report.toJSON()); // Convertir el objeto Sequelize a JSON
+            }
+        });
+
+        res.json({ reports: uniqueReports });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
