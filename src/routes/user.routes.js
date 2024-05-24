@@ -15,6 +15,6 @@ userRouter.post('/add-module', [verifyToken, isAdmin], createUserModule);
 userRouter.post('/add-report', [verifyToken, isAdmin], createUserReport);
 userRouter.delete('/delete-group', [verifyToken, isAdmin], deleteUserGroup);
 userRouter.delete('/delete-module', [verifyToken, isAdmin], deleteUserModule);
-userRouter.delete('/delete-report', [verifyToken, isAdmin], deleteUserReport);
+userRouter.delete('/:userId/delete-report/:reportId', [verifyToken, isAdmin], deleteUserReport);
 
 export default userRouter;

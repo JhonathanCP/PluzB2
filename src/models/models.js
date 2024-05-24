@@ -16,7 +16,7 @@ export const User = sequelize.define('User', {
     lastname: {
         type: DataTypes.STRING,
         allowNull: true
-    },
+    },  
     dni: {
         type: DataTypes.STRING,
         allowNull: true
@@ -345,6 +345,11 @@ export const Report = sequelize.define('Report', {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     }
+}, {
+    // Permitir que `createdAt` y `updatedAt` sean actualizados manualmente
+    timestamps: false,
+    updatedAt: 'updatedAt',
+    createdAt: 'createdAt'
 });
 
 // Definir el modelo Report
@@ -375,12 +380,25 @@ export const Notification = sequelize.define('Notification', {
     },
     openedAt: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
         onUpdate: DataTypes.NOW
     }
 });
 
+// Definir el modelo GroupTag
+export const GroupTag = sequelize.define('GroupTag', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
 
+// Definir el modelo Tag
+export const Tag = sequelize.define('Tag', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
 
 // Sequelize hooks for password encryption
 User.beforeCreate(async (user) => {
@@ -445,6 +463,9 @@ Report.belongsToMany(User, { through: 'UserReport' });
 AccessRequest.belongsToMany(Report, { through: 'AccessRequestReport' });
 Report.belongsToMany(AccessRequest, { through: 'AccessRequestReport' });
 
+Tag.belongsToMany(Report, { through: 'TagReport' });
+Report.belongsToMany(Tag, { through: 'TagReport' });
+
 Module.belongsTo(Group, { 
     foreignKey: {
         allowNull: false
@@ -460,6 +481,9 @@ Report.belongsTo(Module, {
     required: true
 });
 Module.hasMany(Report);
+
+Tag.belongsTo(GroupTag);
+GroupTag.hasMany(Tag);
 
 LoginAudit.belongsTo(User);
 User.hasMany(LoginAudit);

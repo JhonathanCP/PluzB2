@@ -1,4 +1,4 @@
-import { AccessRequest, State } from "../models/models.js";
+import { AccessRequest, State, Notification } from "../models/models.js";
 import multer from 'multer';
 
 const storage = multer.memoryStorage();
@@ -101,7 +101,7 @@ export const updateAccessRequest = async (req, res) => {
 // Actualizar una solicitud de acceso existente sin el pdfBlob
 export const approveAccessRequest = async (req, res) => {
     const { id } = req.params;
-    const { justification, cargo, nombreJefe, cargoJefe, UserId, StateId, ReportId } = req.body;
+    const { justification, cargo, nombreJefe, cargoJefe, UserId, StateId } = req.body;
     try {
         const accessRequest = await AccessRequest.findByPk(id);
         if (accessRequest) {
@@ -111,8 +111,12 @@ export const approveAccessRequest = async (req, res) => {
                 nombreJefe,
                 cargoJefe,
                 UserId,
-                StateId,
-                ReportId
+                StateId
+            });
+            await Notification.create({
+                UserId: UserId,
+                name: 'Respuesta de solicitud de acceso',
+                shortDescription: `Su solicitud de acceso a los reportes ha sido aprobada.`
             });
             res.json(accessRequest);
         } else {

@@ -135,7 +135,7 @@ export const createUserReport = async (req, res) => {
 
 export const deleteUserReport = async (req, res) => {
     try {
-        const { userId, reportId } = req.body;
+        const { userId, reportId } = req.params;
         const user = await User.findByPk(userId);
         const report = await Report.findByPk(reportId, { include: [{ model: Module, include: [Group] }] }); // Incluimos el módulo y el grupo al que pertenece el reporte
         if (!user || !report) {
@@ -204,14 +204,19 @@ export const getGroupsByUser = async (req, res) => {
         }
         const userGroups = user.Groups;
 
-        // Obtener los grupos que tienen al menos un reporte gratuito
+        let whereCondition = { free: true, active: true };
+        if (user.RoleId === 2) {
+            whereCondition = {}; // Si el role es 2, eliminar el filtro de free
+        }
+
+        // Obtener los grupos que tienen al menos un reporte, ajustando el filtro por el role del usuario
         const groupsWithFreeReport = await Group.findAll({
             include: {
                 model: Module,
                 include: {
                     model: Report,
-                    where: { free: true }, // Solo se incluirán los reportes con campo free true
-                    required: true // Asegura que solo se incluyan los módulos con al menos un reporte free
+                    where: whereCondition, // Aplicar la condición modificada según el role
+                    required: true // Asegura que solo se incluyan los módulos con al menos un reporte que cumpla la condición
                 }
             }
         });
@@ -228,7 +233,7 @@ export const getGroupsByUser = async (req, res) => {
             }
         });
 
-        // Agregar grupos con al menos un reporte gratuito
+        // Agregar grupos con al menos un reporte según la condición de free o todos si role es 2
         filteredGroupsWithFreeReport.forEach(group => {
             if (!uniqueGroups.some(g => g.id === group.id)) {
                 uniqueGroups.push(group.toJSON()); // Convertir el objeto Sequelize a JSON
@@ -243,6 +248,7 @@ export const getGroupsByUser = async (req, res) => {
 };
 
 
+
 export const getModulesByUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -254,28 +260,33 @@ export const getModulesByUser = async (req, res) => {
         }
         const userModules = user.Modules;
 
-        // Obtener los módulos que tienen al menos un reporte gratuito
+        let whereCondition = { free: true, active: true };
+        if (user.RoleId === 2) {
+            whereCondition = {}; // Si el role es 2, eliminar el filtro de free
+        }
+
+        // Obtener los módulos que tienen al menos un reporte que cumple la condición ajustada según el role
         const modulesWithFreeReport = await Module.findAll({
             include: {
                 model: Report,
-                where: { free: true },
-                required: true // Solo se incluirán los reportes con campo free true
+                where: whereCondition, // Aplicar la condición modificada según el role
+                required: true // Solo se incluirán los reportes que cumplen la condición
             }
         });
 
         const filteredModulesWithFreeReport = modulesWithFreeReport.filter(module => module.Reports.length > 0);
 
-        // Array temporal para almacenar los grupos únicos
+        // Array temporal para almacenar los módulos únicos
         const uniqueModules = [];
 
-        // Agregar grupos asignados al usuario
+        // Agregar módulos asignados al usuario
         userModules.forEach(module => {
             if (!uniqueModules.some(m => m.id === module.id)) {
                 uniqueModules.push(module);
             }
         });
 
-        // Agregar grupos con al menos un reporte gratuito
+        // Agregar módulos con al menos un reporte que cumple la condición
         filteredModulesWithFreeReport.forEach(module => {
             if (!uniqueModules.some(m => m.id === module.id)) {
                 uniqueModules.push(module.toJSON()); // Convertir el objeto Sequelize a JSON
@@ -290,21 +301,39 @@ export const getModulesByUser = async (req, res) => {
 };
 
 
+
 export const getReportsByUser = async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Obtener los reportes asignados al usuario
-        const user = await User.findByPk(id, { include: Report });
+        // Obtener el usuario y determinar si incluir todos los reportes
+        const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const userReports = user.Reports;
+
+        // let whereCondition = { active: true };
+        let whereCondition = {};
+        if (user.RoleId === 2) {
+            whereCondition = {}; // Si el role es 2, eliminar el filtro de activo
+        }
+
+        // Obtener los reportes asignados al usuario según el role
+        const userReports = await Report.findAll({
+            include: [{
+                model: User,
+                where: { id: id }
+            }],
+            where: whereCondition
+        });
 
         // Obtener los reportes que tienen el campo 'free' en true
+        // Y ajustar para incluir inactivos si el role es 2
         const reportsWithFree = await Report.findAll({
-            where: { free: true },
-            required: true
+            where: {
+                free: true,
+                ...whereCondition // Usar la misma condición determinada por el role
+            }
         });
 
         // Array temporal para almacenar los reportes únicos
@@ -313,14 +342,14 @@ export const getReportsByUser = async (req, res) => {
         // Agregar reportes asignados al usuario
         userReports.forEach(report => {
             if (!uniqueReports.some(r => r.id === report.id)) {
-                uniqueReports.push(report);
+                uniqueReports.push(report.toJSON());
             }
         });
 
-        // Agregar reportes con el campo 'free' en true
+        // Agregar reportes con el campo 'free'
         reportsWithFree.forEach(report => {
             if (!uniqueReports.some(r => r.id === report.id)) {
-                uniqueReports.push(report.toJSON()); // Convertir el objeto Sequelize a JSON
+                uniqueReports.push(report.toJSON());
             }
         });
 

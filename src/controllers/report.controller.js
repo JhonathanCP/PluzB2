@@ -27,7 +27,7 @@ export const getReportById = async (req, res) => {
 };
 
 export const createReport = async (req, res) => {
-    const { name, description, version, icon, link, free, limited, restricted, ModuleId } = req.body;
+    const { name, description, version, icon, link, free, limited, restricted, ModuleId, updatedAt, createdAt } = req.body;
     try {
         const newReport = await Report.create({
             name,
@@ -38,7 +38,9 @@ export const createReport = async (req, res) => {
             free,
             limited,
             restricted,
-            ModuleId
+            ModuleId,
+            updatedAt, 
+            createdAt
         });
 
         // Notificar a todos los usuarios que tienen permiso en el ModuleId
@@ -69,14 +71,13 @@ export const createReport = async (req, res) => {
 
 export const updateReport = async (req, res) => {
     const { id } = req.params;
-    const { name, description, version, icon, link, free, active, confidential, ModuleId } = req.body;
+    const { name, description, version, icon, link, free, limited, restricted, active, ModuleId, createdAt, updatedAt } = req.body;
     try {
         const report = await Report.findByPk(id);
         if (report) {
             const TempModuleId = report.ModuleId;
             const TempName = report.name;
 
-            // Notificar a todos los usuarios que tienen permiso en el ModuleId sobre la actualización del reporte
             const usersWithPermission = await User.findAll({
                 include: {
                     model: Module,
@@ -91,9 +92,12 @@ export const updateReport = async (req, res) => {
                 icon,
                 link,
                 free,
+                limited,
+                restricted,
                 active,
-                confidential,
-                ModuleId
+                ModuleId,
+                createdAt, // Permitir actualización manual
+                updatedAt  // Permitir actualización manual
             });
 
             const notificationPromises = usersWithPermission.map(async (user) => {
@@ -115,6 +119,7 @@ export const updateReport = async (req, res) => {
         res.status(500).json({ message: "Error al actualizar el reporte" });
     }
 };
+
 
 // Eliminar un reporte existente
 export const deleteReport = async (req, res) => {
