@@ -313,7 +313,7 @@ export const getReportsByUser = async (req, res) => {
         }
 
         // let whereCondition = { active: true };
-        let whereCondition = {};
+        let whereCondition = { active: true };
         if (user.RoleId === 2) {
             whereCondition = {}; // Si el role es 2, eliminar el filtro de activo
         }
