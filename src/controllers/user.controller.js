@@ -1,5 +1,43 @@
 import { User, Report, Module, Group } from '../models/models.js';
 
+export const createUser = async (req, res) => {
+    try {
+        const { username, firstname, lastname, dni, email, password, cargo, RoleId, ldap } = req.body;
+
+        // Verificar que el email y el username no estén ya en uso
+        const existingUser = await User.findOne({ where: { email } });
+        const existingUsername = await User.findOne({ where: { username } });
+
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email is already in use' });
+        }
+
+        if (existingUsername) {
+            return res.status(400).json({ message: 'Username is already in use' });
+        }
+
+        // Crear hash de la contraseña
+
+        // Crear el usuario
+        const newUser = await User.create({
+            username,
+            firstname,
+            lastname,
+            dni,
+            email,
+            password,
+            cargo,
+            RoleId: RoleId || 1, // Asignar un rol por defecto si no se proporciona uno
+            ldap: true // Asignar false como valor por defecto para ldap si no se proporciona
+        });
+
+        res.status(201).json({ message: 'User created successfully', user: newUser });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -192,55 +230,73 @@ export const addAllData = async (req, res) => {
     }
 };
 
-// Controlador para obtener los grupos asignados a un usuario específico y los grupos que tienen al menos un reporte gratuito
 export const getGroupsByUser = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        // Obtener los grupos asignados al usuario
-        const user = await User.findByPk(id, { include: Group });
+
+        // Obtener el usuario y determinar si incluir todos los reportes
+        const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const userGroups = user.Groups;
 
-        let whereCondition = { free: true, active: true };
+        let whereCondition = {  };
         if (user.RoleId === 2) {
-            whereCondition = {}; // Si el role es 2, eliminar el filtro de free
+            whereCondition = {}; // Si el role es 2, eliminar el filtro de activo
         }
 
-        // Obtener los grupos que tienen al menos un reporte, ajustando el filtro por el role del usuario
-        const groupsWithFreeReport = await Group.findAll({
-            include: {
-                model: Module,
-                include: {
-                    model: Report,
-                    where: whereCondition, // Aplicar la condición modificada según el role
-                    required: true // Asegura que solo se incluyan los módulos con al menos un reporte que cumpla la condición
+        // Obtener los reportes asignados al usuario según el role
+        const userReports = await Report.findAll({
+            include: [{
+                model: User,
+                where: { id: id }
+            }],
+            where: whereCondition
+        });
+
+        // Obtener los reportes que tienen el campo 'free' en true
+        const reportsWithFree = await Report.findAll({
+            where: {
+                free: true,
+                ...whereCondition
+            }
+        });
+
+        // Combinar y filtrar reportes únicos
+        const uniqueReports = [];
+        userReports.forEach(report => {
+            if (!uniqueReports.some(r => r.id === report.id)) {
+                uniqueReports.push(report);
+            }
+        });
+        reportsWithFree.forEach(report => {
+            if (!uniqueReports.some(r => r.id === report.id)) {
+                uniqueReports.push(report);
+            }
+        });
+
+        // Obtener los módulos que contienen estos reportes únicos
+        const modulesWithVisibleReports = await Module.findAll({
+            include: [{
+                model: Report,
+                where: {
+                    id: uniqueReports.map(report => report.id)
                 }
-            }
+            }]
         });
 
-        const filteredGroupsWithFreeReport = groupsWithFreeReport.filter(group => group.Modules.length > 0);
-
-        // Array temporal para almacenar los grupos únicos
-        const uniqueGroups = [];
-
-        // Agregar grupos asignados al usuario
-        userGroups.forEach(group => {
-            if (!uniqueGroups.some(g => g.id === group.id)) {
-                uniqueGroups.push(group);
-            }
+        // Obtener los grupos que contienen estos módulos
+        const groupsWithVisibleModules = await Group.findAll({
+            include: [{
+                model: Module,
+                where: {
+                    id: modulesWithVisibleReports.map(module => module.id)
+                },
+                include: [Report]
+            }]
         });
 
-        // Agregar grupos con al menos un reporte según la condición de free o todos si role es 2
-        filteredGroupsWithFreeReport.forEach(group => {
-            if (!uniqueGroups.some(g => g.id === group.id)) {
-                uniqueGroups.push(group.toJSON()); // Convertir el objeto Sequelize a JSON
-            }
-        });
-
-        res.json({ groups: uniqueGroups });
+        res.json({ groups: groupsWithVisibleModules });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -248,52 +304,62 @@ export const getGroupsByUser = async (req, res) => {
 };
 
 
-
 export const getModulesByUser = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        // Obtener los módulos asignados al usuario
-        const user = await User.findByPk(id, { include: Module });
+
+        // Obtener el usuario y determinar si incluir todos los reportes
+        const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const userModules = user.Modules;
 
-        let whereCondition = { free: true, active: true };
+        let whereCondition = {  };
         if (user.RoleId === 2) {
-            whereCondition = {}; // Si el role es 2, eliminar el filtro de free
+            whereCondition = {}; // Si el role es 2, eliminar el filtro de activo
         }
 
-        // Obtener los módulos que tienen al menos un reporte que cumple la condición ajustada según el role
-        const modulesWithFreeReport = await Module.findAll({
-            include: {
+        // Obtener los reportes asignados al usuario según el role
+        const userReports = await Report.findAll({
+            include: [{
+                model: User,
+                where: { id: id }
+            }],
+            where: whereCondition
+        });
+
+        // Obtener los reportes que tienen el campo 'free' en true
+        const reportsWithFree = await Report.findAll({
+            where: {
+                free: true,
+                ...whereCondition
+            }
+        });
+
+        // Combinar y filtrar reportes únicos
+        const uniqueReports = [];
+        userReports.forEach(report => {
+            if (!uniqueReports.some(r => r.id === report.id)) {
+                uniqueReports.push(report);
+            }
+        });
+        reportsWithFree.forEach(report => {
+            if (!uniqueReports.some(r => r.id === report.id)) {
+                uniqueReports.push(report);
+            }
+        });
+
+        // Obtener los módulos que contienen estos reportes únicos
+        const modulesWithVisibleReports = await Module.findAll({
+            include: [{
                 model: Report,
-                where: whereCondition, // Aplicar la condición modificada según el role
-                required: true // Solo se incluirán los reportes que cumplen la condición
-            }
+                where: {
+                    id: uniqueReports.map(report => report.id)
+                }
+            }]
         });
 
-        const filteredModulesWithFreeReport = modulesWithFreeReport.filter(module => module.Reports.length > 0);
-
-        // Array temporal para almacenar los módulos únicos
-        const uniqueModules = [];
-
-        // Agregar módulos asignados al usuario
-        userModules.forEach(module => {
-            if (!uniqueModules.some(m => m.id === module.id)) {
-                uniqueModules.push(module);
-            }
-        });
-
-        // Agregar módulos con al menos un reporte que cumple la condición
-        filteredModulesWithFreeReport.forEach(module => {
-            if (!uniqueModules.some(m => m.id === module.id)) {
-                uniqueModules.push(module.toJSON()); // Convertir el objeto Sequelize a JSON
-            }
-        });
-
-        res.json({ modules: uniqueModules });
+        res.json({ modules: modulesWithVisibleReports });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -305,15 +371,14 @@ export const getModulesByUser = async (req, res) => {
 export const getReportsByUser = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Obtener el usuario y determinar si incluir todos los reportes
         const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // let whereCondition = { active: true };
-        let whereCondition = { active: true };
+        let whereCondition = {  };
         if (user.RoleId === 2) {
             whereCondition = {}; // Si el role es 2, eliminar el filtro de activo
         }

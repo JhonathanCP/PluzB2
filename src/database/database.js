@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 
-export const sequelize = new Sequelize('pbi_gctic_v2', 'postgres', 'AKindOfMagic', {
+export const sequelize = new Sequelize('pbi_gctic_v1.1', 'postgres', 'AKindOfMagic', {
     host: '10.0.1.229',
     dialect: 'postgres',
 //    dialectOptions: {

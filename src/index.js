@@ -7,8 +7,8 @@ async function main() {
         await sequelize.authenticate();
         await sequelize.sync({alter: true});
         console.log('Database connected');
-        app.listen(3000, '0.0.0.0');
-        console.log("Serven is listening on port", 3000);
+        app.listen(4000);
+        console.log("Server is listening on port", 4000);
     } catch (error) {
         console.log('Unable to connect to database', error);
     }

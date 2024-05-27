@@ -6,10 +6,10 @@ const accessRequestRouter = Router()
 
 accessRequestRouter.get('/', [verifyToken, isAdmin], getAllAccessRequests);
 accessRequestRouter.get('/:id', [verifyToken, isAdmin], getAccessRequestById);
-accessRequestRouter.post('/', [verifyToken, isAdmin], createAccessRequest);
+accessRequestRouter.post('/', [verifyToken], createAccessRequest);
 accessRequestRouter.put('/:id', [verifyToken, isAdmin],updateAccessRequest);
 accessRequestRouter.delete('/:id', [verifyToken, isAdmin],deleteAccessRequest);
-accessRequestRouter.post('/:id/pdf', [verifyToken, isAdmin], uploadPdfMiddleware, uploadPdfForAccessRequest);
+accessRequestRouter.post('/:id/pdf', [verifyToken], uploadPdfMiddleware, uploadPdfForAccessRequest);
 accessRequestRouter.get('/:id/pdf',  getPdfById);
 
 export default accessRequestRouter;
