@@ -1,4 +1,4 @@
-import { Group, Module, Report } from "../models/models.js";
+import { Group } from "../models/models.js";
 
 // Obtener todos los grupos
 export const getAllGroups = async (req, res) => {
@@ -29,13 +29,12 @@ export const getGroupById = async (req, res) => {
 
 // Crear un nuevo grupo
 export const createGroup = async (req, res) => {
-    const { name, description, icon, free } = req.body;
+    const { name, description, icon } = req.body;
     try {
         const newGroup = await Group.create({
             name,
             description,
-            icon,
-            free
+            icon
         });
         res.status(201).json(newGroup);
     } catch (error) {
@@ -47,7 +46,7 @@ export const createGroup = async (req, res) => {
 // Actualizar un grupo existente
 export const updateGroup = async (req, res) => {
     const { id } = req.params;
-    const { name, description, icon, active, free } = req.body;
+    const { name, description, icon, active } = req.body;
     try {
         const group = await Group.findByPk(id);
         if (group) {
@@ -55,7 +54,6 @@ export const updateGroup = async (req, res) => {
                 name,
                 description,
                 icon,
-                free,
                 active
             });
             res.json(group);
@@ -82,26 +80,5 @@ export const deleteGroup = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al eliminar el grupo" });
-    }
-};
-
-export const getGroupsByFreeReport = async (req, res) => {
-    try {
-        const groups = await Group.findAll({
-            include: {
-                model: Module,
-                include: {
-                    model: Report,
-                    where: { free: true }, // Solo se incluirán los reportes con campo free true
-                    required: true // Asegura que solo se incluyan los módulos con al menos un reporte free
-                }
-            }
-        });
-        // Filtrar los grupos que tienen al menos un módulo con al menos un reporte free
-        const filteredGroups = groups.filter(group => group.Modules.length > 0);
-        res.status(200).json(filteredGroups);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
     }
 };

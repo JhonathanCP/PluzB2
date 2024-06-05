@@ -27,7 +27,7 @@ export const getReportById = async (req, res) => {
 };
 
 export const createReport = async (req, res) => {
-    const { name, description, version, icon, link, free, limited, restricted, ModuleId, updatedAt, createdAt } = req.body;
+    const { name, description, version, icon, link, free, limited, restricted, ModuleId, GroupId, updatedAt, createdAt } = req.body;
     try {
         const newReport = await Report.create({
             name,
@@ -39,6 +39,7 @@ export const createReport = async (req, res) => {
             limited,
             restricted,
             ModuleId,
+            GroupId,
             updatedAt, 
             createdAt
         });
@@ -71,7 +72,7 @@ export const createReport = async (req, res) => {
 
 export const updateReport = async (req, res) => {
     const { id } = req.params;
-    const { name, description, version, icon, link, free, limited, restricted, active, ModuleId, createdAt, updatedAt } = req.body;
+    const { name, description, version, icon, link, free, limited, restricted, active, ModuleId, GroupId, createdAt, updatedAt } = req.body;
     try {
         const report = await Report.findByPk(id);
         if (report) {
@@ -96,6 +97,7 @@ export const updateReport = async (req, res) => {
                 restricted,
                 active,
                 ModuleId,
+                GroupId,
                 createdAt, // Permitir actualización manual
                 updatedAt  // Permitir actualización manual
             });

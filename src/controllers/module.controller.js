@@ -29,14 +29,12 @@ export const getModuleById = async (req, res) => {
 
 // Crear un nuevo modulo
 export const createModule = async (req, res) => {
-    const { name, description, icon, free, GroupId } = req.body;
+    const { name, description, icon } = req.body;
     try {
         const newModule = await Module.create({
             name,
             description,
-            icon,
-            free,
-            GroupId
+            icon
         });
         res.status(201).json(newModule);
     } catch (error) {
@@ -48,7 +46,7 @@ export const createModule = async (req, res) => {
 // Actualizar un modulo existente
 export const updateModule = async (req, res) => {
     const { id } = req.params;
-    const { name, description, icon, active, free, GroupId } = req.body;
+    const { name, description, icon, active } = req.body;
     try {
         const module = await Module.findByPk(id);
         if (module) {
@@ -56,9 +54,7 @@ export const updateModule = async (req, res) => {
                 name,
                 description,
                 icon,
-                free,
-                active,
-                GroupId
+                active
             });
             res.json(module);
         } else {

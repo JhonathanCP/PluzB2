@@ -11,6 +11,8 @@ import reportRouter from "./routes/report.routes.js"
 import notificationRouter from "./routes/notification.routes.js";
 import accessRequestRouter from "./routes/accessrequet.routes.js";
 import accessAuditRouter from "./routes/accessaudit.routes.js";
+import mainDependencyRouter from "./routes/maindependency.routes.js";
+import dependencyRouter from "./routes/dependency.routes.js";
 
 const app = express();
 createRoles();
@@ -33,5 +35,7 @@ app.use('/report', reportRouter)
 app.use('/notification', notificationRouter)
 app.use('/accessrequest', accessRequestRouter)
 app.use('/accessaudit', accessAuditRouter)
+app.use('/maindependency', mainDependencyRouter)
+app.use('/dependency', dependencyRouter)
 
 export default app;

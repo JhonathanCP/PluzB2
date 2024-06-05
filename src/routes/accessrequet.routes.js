@@ -4,11 +4,11 @@ import { verifyToken, isAdmin } from "../middlewares/authJwt.js";
 
 const accessRequestRouter = Router()
 
-accessRequestRouter.get('/', [verifyToken, isAdmin], getAllAccessRequests);
+accessRequestRouter.get('/', [verifyToken], getAllAccessRequests);
 accessRequestRouter.get('/:id', [verifyToken, isAdmin], getAccessRequestById);
 accessRequestRouter.post('/', [verifyToken], createAccessRequest);
 accessRequestRouter.put('/:id', [verifyToken, isAdmin],updateAccessRequest);
-accessRequestRouter.delete('/:id', [verifyToken, isAdmin],deleteAccessRequest);
+accessRequestRouter.delete('/:id', [verifyToken],deleteAccessRequest);
 accessRequestRouter.post('/:id/pdf', [verifyToken], uploadPdfMiddleware, uploadPdfForAccessRequest);
 accessRequestRouter.get('/:id/pdf',  getPdfById);
 

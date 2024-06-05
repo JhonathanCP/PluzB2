@@ -131,7 +131,7 @@ export const MainDependency = sequelize.define('MainDependency', {
     },
     description: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -150,7 +150,7 @@ export const Dependency = sequelize.define('Dependency', {
     },
     description: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -258,10 +258,6 @@ export const Group = sequelize.define('Group', {
     icon: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    free: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
     }
 });
 
@@ -291,10 +287,6 @@ export const Module = sequelize.define('Module', {
     icon: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    free: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
     }
 });
 
@@ -451,9 +443,6 @@ Dependency.hasMany(User);
 Notification.belongsTo(User);
 User.hasMany(Notification);
 
-User.belongsToMany(Group, { through: 'UserGroup' });
-Group.belongsToMany(User, { through: 'UserGroup' });
-
 User.belongsToMany(Module, { through: 'UserModule' });
 Module.belongsToMany(User, { through: 'UserModule' });
 
@@ -466,14 +455,6 @@ Report.belongsToMany(AccessRequest, { through: 'AccessRequestReport' });
 Tag.belongsToMany(Report, { through: 'TagReport' });
 Report.belongsToMany(Tag, { through: 'TagReport' });
 
-Module.belongsTo(Group, { 
-    foreignKey: {
-        allowNull: false
-    },
-    required: true
-});
-Group.hasMany(Module);
-
 Report.belongsTo(Module, { 
     foreignKey: {
         allowNull: false
@@ -481,6 +462,14 @@ Report.belongsTo(Module, {
     required: true
 });
 Module.hasMany(Report);
+
+Report.belongsTo(Group, { 
+    foreignKey: {
+        allowNull: false
+    },
+    required: true
+});
+Group.hasMany(Report);
 
 Tag.belongsTo(GroupTag);
 GroupTag.hasMany(Tag);
