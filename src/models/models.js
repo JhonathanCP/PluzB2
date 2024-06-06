@@ -9,27 +9,11 @@ export const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    firstname: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    lastname: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },  
-    dni: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
     email: {
         type: DataTypes.STRING,
         allowNull: false
     },
     password: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    cargo: {
         type: DataTypes.STRING,
         allowNull: true
     },
@@ -47,6 +31,46 @@ export const User = sequelize.define('User', {
         defaultValue: true
     },
     ldap: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+});
+
+export const RL = sequelize.define('RL', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        onUpdate: DataTypes.NOW
+    },
+    active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+});
+
+export const Position = sequelize.define('Position', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        onUpdate: DataTypes.NOW
+    },
+    active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     }
@@ -168,15 +192,11 @@ export const AccessRequest = sequelize.define('AccessRequest', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    cargo: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     nombreJefe: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    cargoJefe: {
+    area: {
         type: DataTypes.STRING,
         allowNull: false
     },
@@ -434,6 +454,12 @@ User.hasMany(ImplementationRequest);
 User.belongsTo(Role);
 Role.hasMany(User);
 
+User.belongsTo(RL);
+RL.hasMany(User);
+
+User.belongsTo(Position);
+Position.hasMany(User);
+
 Dependency.belongsTo(MainDependency);
 MainDependency.hasMany(Dependency);
 
@@ -470,9 +496,6 @@ Report.belongsTo(Group, {
     required: true
 });
 Group.hasMany(Report);
-
-Tag.belongsTo(GroupTag);
-GroupTag.hasMany(Tag);
 
 LoginAudit.belongsTo(User);
 User.hasMany(LoginAudit);

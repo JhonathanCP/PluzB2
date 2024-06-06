@@ -1,8 +1,8 @@
-import { User, Report, Module, Group, Dependency } from '../models/models.js';
+import { User, Report, Module, Dependency, RL, Position } from '../models/models.js';
 
 export const createUser = async (req, res) => {
     try {
-        const { username, firstname, lastname, dni, email, password, cargo, RoleId, DependencyId, ldap } = req.body;
+        const { username, firstname, lastname, dni, email, password, cargo, RoleId, DependencyId, ldap, RLId, PositionId } = req.body;
 
         // Verificar que el email y el username no estén ya en uso
         const existingUser = await User.findOne({ where: { email } });
@@ -27,7 +27,9 @@ export const createUser = async (req, res) => {
             cargo,
             RoleId: RoleId || 1, // Asignar un rol por defecto si no se proporciona uno
             DependencyId, // Incluir el DependencyId
-            ldap: true // Asignar true como valor por defecto para ldap si no se proporciona
+            ldap: ldap || true,
+            RLId,
+            PositionId
         });
 
         res.status(201).json({ message: 'User created successfully', user: newUser });
@@ -40,7 +42,7 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, firstname, lastname, dni, email, password, cargo, RoleId, DependencyId, ldap } = req.body;
+        const { username, firstname, lastname, dni, email, password, cargo, RoleId, DependencyId, ldap, RLId, PositionId } = req.body;
 
         const user = await User.findByPk(id);
 
@@ -74,7 +76,9 @@ export const updateUser = async (req, res) => {
             cargo,
             RoleId: RoleId || user.RoleId, // Mantener el rol actual si no se proporciona uno nuevo
             DependencyId, // Actualizar el DependencyId
-            ldap: ldap !== undefined ? ldap : user.ldap // Mantener el valor actual de ldap si no se proporciona uno nuevo
+            ldap: ldap !== undefined ? ldap : user.ldap, // Mantener el valor actual de ldap si no se proporciona uno nuevo
+            RLId,
+            PositionId
         });
 
         res.status(200).json({ message: 'User updated successfully', user });

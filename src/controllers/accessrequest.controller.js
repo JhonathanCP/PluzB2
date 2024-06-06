@@ -2,9 +2,9 @@ import { AccessRequest, State, Notification } from "../models/models.js";
 import multer from 'multer';
 
 const storage = multer.memoryStorage();
-const upload = multer({ 
+const upload = multer({
     storage: storage,
-    limits: {limits: 10 * 1024 * 1024}
+    limits: { limits: 10 * 1024 * 1024 }
 });
 
 // Obtener todas las solicitudes de acceso
@@ -35,7 +35,7 @@ export const getAccessRequestById = async (req, res) => {
 };
 // Crear una nueva solicitud de acceso sin el pdfBlob
 export const createAccessRequest = async (req, res) => {
-    const { justification, cargo, nombreJefe, cargoJefe, UserId, ReportIds } = req.body;
+    const { justification, nombreJefe, area, UserId, ReportIds } = req.body;
 
     try {
         // Buscar el estado "PENDIENTE DE FIRMA"
@@ -51,9 +51,8 @@ export const createAccessRequest = async (req, res) => {
         // Crear la solicitud de acceso con el estado encontrado
         const newAccessRequest = await AccessRequest.create({
             justification,
-            cargo,
             nombreJefe,
-            cargoJefe,
+            area,
             UserId,
             StateId: state.id, // Asignar el ID del estado encontrado
         });
@@ -75,15 +74,14 @@ export const createAccessRequest = async (req, res) => {
 // Actualizar una solicitud de acceso existente sin el pdfBlob
 export const updateAccessRequest = async (req, res) => {
     const { id } = req.params;
-    const { justification, cargo, nombreJefe, cargoJefe, UserId, StateId, ReportId } = req.body;
+    const { justification, nombreJefe, area, UserId, StateId, ReportId } = req.body;
     try {
         const accessRequest = await AccessRequest.findByPk(id);
         if (accessRequest) {
             await accessRequest.update({
                 justification,
-                cargo,
                 nombreJefe,
-                cargoJefe,
+                area,
                 UserId,
                 StateId,
                 ReportId
@@ -101,15 +99,14 @@ export const updateAccessRequest = async (req, res) => {
 // Actualizar una solicitud de acceso existente sin el pdfBlob
 export const approveAccessRequest = async (req, res) => {
     const { id } = req.params;
-    const { justification, cargo, nombreJefe, cargoJefe, UserId, StateId } = req.body;
+    const { justification, nombreJefe, area, UserId, StateId } = req.body;
     try {
         const accessRequest = await AccessRequest.findByPk(id);
         if (accessRequest) {
             await accessRequest.update({
                 justification,
-                cargo,
                 nombreJefe,
-                cargoJefe,
+                area,
                 UserId,
                 StateId
             });
@@ -131,15 +128,14 @@ export const approveAccessRequest = async (req, res) => {
 // Actualizar una solicitud de acceso existente sin el pdfBlob
 export const denyAccessRequest = async (req, res) => {
     const { id } = req.params;
-    const { justification, cargo, nombreJefe, cargoJefe, UserId, StateId, ReportId } = req.body;
+    const { justification, nombreJefe, area, UserId, StateId, ReportId } = req.body;
     try {
         const accessRequest = await AccessRequest.findByPk(id);
         if (accessRequest) {
             await accessRequest.update({
                 justification,
-                cargo,
                 nombreJefe,
-                cargoJefe,
+                area,
                 UserId,
                 StateId,
                 ReportId
