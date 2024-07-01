@@ -52,7 +52,7 @@ export const createAdmin = async () => {
         console.log("User found:", userFound);
 
         if (userFound) {
-            console.log("Admin user already exists");
+            console.log("Admin user already existss");
             return;
         }
 
