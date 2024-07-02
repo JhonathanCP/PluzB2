@@ -469,3 +469,54 @@ export const getReportsByUser = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+export const addFavorite = async (req, res) => {
+    const { userId, reportId } = req.body;
+    try {
+        const user = await User.findByPk(userId);
+        const report = await Report.findByPk(reportId);
+        if (!user || !report) {
+            return res.status(404).json({ message: 'User or Report not found' });
+        }
+        await user.addFavoriteReport(report);
+        res.status(201).json({ message: 'Report added to favorites successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const removeFavorite = async (req, res) => {
+    const { userId, reportId } = req.body;
+    try {
+        const user = await User.findByPk(userId);
+        const report = await Report.findByPk(reportId);
+        if (!user || !report) {
+            return res.status(404).json({ message: 'User or Report not found' });
+        }
+        await user.removeFavoriteReport(report);
+        res.status(200).json({ message: 'Report removed from favorites successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const getFavorites = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await User.findByPk(id, {
+            include: [{
+                model: Report,
+                as: 'FavoriteReports'
+            }]
+        });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ favoriteReports: user.FavoriteReports });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

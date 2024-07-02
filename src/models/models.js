@@ -475,6 +475,15 @@ Module.belongsToMany(User, { through: 'UserModule' });
 User.belongsToMany(Report, { through: 'UserReport' });
 Report.belongsToMany(User, { through: 'UserReport' });
 
+User.belongsToMany(Report, {
+    through: 'UserFavoriteReport',
+    as: 'FavoriteReports'
+});
+Report.belongsToMany(User, {
+    through: 'UserFavoriteReport',
+    as: 'FavoritedBy'
+});
+
 AccessRequest.belongsToMany(Report, { through: 'AccessRequestReport' });
 Report.belongsToMany(AccessRequest, { through: 'AccessRequestReport' });
 
