@@ -1,5 +1,10 @@
-import { AccessRequest, State, Notification } from "../models/models.js";
+import { AccessRequest, State, Notification, Report, Group, Module, User } from "../models/models.js";
 import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import PDFDocument from 'pdfkit';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -10,7 +15,13 @@ const upload = multer({
 // Obtener todas las solicitudes de acceso
 export const getAllAccessRequests = async (req, res) => {
     try {
-        const accessRequests = await AccessRequest.findAll();
+        const accessRequests = await AccessRequest.findAll({
+            attributes: { exclude: ['pdfBlob'] }, // Excluir el campo pdfBlob
+            include: [
+                { model: Report, attributes: { exclude: ['pdfBlob'] }, through: { attributes: [] } }, // Excluir el campo pdfBlob en Report
+                { model: User, as: 'RequestedFor', attributes: { exclude: ['pdfBlob'] }, through: { attributes: [] } } // Excluir el campo pdfBlob en User
+            ]
+        });
         res.json(accessRequests);
     } catch (error) {
         console.error(error);
@@ -18,11 +29,35 @@ export const getAllAccessRequests = async (req, res) => {
     }
 };
 
+export const getAccessRequestsByUser = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const accessRequests = await AccessRequest.findAll({
+            where: { UserId: userId },
+            attributes: { exclude: ['pdfBlob'] }, // Excluir el campo pdfBlob
+            include: [
+                { model: Report, attributes: { exclude: ['pdfBlob'] }, through: { attributes: [] } }, // Excluir el campo pdfBlob en Report
+                { model: User, as: 'RequestedFor', attributes: { exclude: ['pdfBlob'] }, through: { attributes: [] } } // Excluir el campo pdfBlob en User
+            ]
+        });
+        res.json(accessRequests);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener las solicitudes de acceso para el usuario" });
+    }
+};
+
+
 // Obtener una solicitud de acceso por su ID
 export const getAccessRequestById = async (req, res) => {
     const { id } = req.params;
     try {
-        const accessRequest = await AccessRequest.findByPk(id);
+        const accessRequest = await AccessRequest.findByPk(id, {
+            include: [
+                { model: Report, through: { attributes: [] } }, // Incluir los reportes asociados
+                { model: User, as: 'RequestedFor', through: { attributes: [] } } // Incluir los usuarios solicitados
+            ]
+        });
         if (accessRequest) {
             res.json(accessRequest);
         } else {
@@ -33,9 +68,10 @@ export const getAccessRequestById = async (req, res) => {
         res.status(500).json({ message: "Error al obtener la solicitud de acceso" });
     }
 };
-// Crear una nueva solicitud de acceso sin el pdfBlob
+
+
 export const createAccessRequest = async (req, res) => {
-    const { justification, nombreJefe, area, UserId, ReportIds } = req.body;
+    const { nombreSolicitante, UserId, requestedUserIds, ReportIds } = req.body;
 
     try {
         // Buscar el estado "PENDIENTE DE FIRMA"
@@ -48,44 +84,145 @@ export const createAccessRequest = async (req, res) => {
             return res.status(404).json({ message: "Estado 'PENDIENTE DE FIRMA' no encontrado" });
         }
 
-        // Crear la solicitud de acceso con el estado encontrado
+        // Crear la solicitud de acceso sin el PDF
         const newAccessRequest = await AccessRequest.create({
-            justification,
-            nombreJefe,
-            area,
-            UserId,
+            nombreSolicitante,
+            UserId, // ID del solicitante
             StateId: state.id, // Asignar el ID del estado encontrado
         });
 
         // Asociar los ReportIds a la solicitud de acceso creada
+        let reportNames = [];
         if (ReportIds && Array.isArray(ReportIds)) {
-            await newAccessRequest.addReports(ReportIds);
+            const reports = await Report.findAll({
+                where: {
+                    id: ReportIds
+                }
+            });
+            await newAccessRequest.addReports(reports);
+            reportNames = reports.map(report => report.name);
         }
 
-        res.status(201).json(newAccessRequest);
+        // Asociar los requestedUserIds a la solicitud de acceso creada
+        let requestedUserNames = [];
+        if (requestedUserIds && Array.isArray(requestedUserIds)) {
+            const users = await User.findAll({
+                where: {
+                    id: requestedUserIds
+                }
+            });
+            await newAccessRequest.addRequestedFor(users);
+            requestedUserNames = users.map(user => user.username);
+        }
+
+        // Crear un nuevo documento PDF con pdfkit
+        const doc = new PDFDocument({ layout: 'landscape' });
+        let buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', async () => {
+            const pdfBuffer = Buffer.concat(buffers);
+
+            // Guardar el PDF en el campo pdfBlob
+            newAccessRequest.pdfBlob = pdfBuffer;
+            await newAccessRequest.save();
+
+            res.status(201).json(newAccessRequest);
+        });
+
+        // Ruta absoluta al logo
+        const logoPath = path.join(__dirname, '../assets/logo.png');
+
+        // Agregar logo al PDF
+        doc.image(logoPath, doc.page.width - 160, 20, { width: 140 });
+
+        // Agregar contenido al PDF en forma de cuadros
+        doc.fontSize(11);
+
+        // Dibujar cuadro para Nombre del solicitante y Fecha de Solicitud
+        const halfWidth = (doc.page.width - 100) / 2;
+        const headerHeight = 30;
+        const contentHeight = 30;
+
+        // Títulos
+        doc.rect(50, 100, halfWidth, headerHeight).stroke();
+        doc.rect(50 + halfWidth, 100, halfWidth, headerHeight).stroke();
+        doc.fillColor('black').text('Nombre del solicitante', 60, 110);
+        doc.text(nombreSolicitante, 60 + halfWidth, 110);
+
+        // Contenidos
+        doc.rect(50, 130, halfWidth, contentHeight).stroke();
+        doc.rect(50 + halfWidth, 130, halfWidth, contentHeight).stroke();
+        doc.text('Fecha de Solicitud', 60, 140);
+        doc.text(newAccessRequest.createdAt.toLocaleString(), 60 + halfWidth, 140);
+
+        // Dibujar cuadro para Reportes Solicitados y Usuarios a los que se les solicita el acceso
+        const sectionHeight = doc.page.height - 330 - headerHeight;
+
+        // Títulos
+        doc.rect(50, 170, halfWidth, headerHeight).stroke();
+        doc.rect(50 + halfWidth, 170, halfWidth, headerHeight).stroke();
+        doc.fillColor('black').text('Reportes Solicitados', 60, 180);
+        doc.text('Usuarios a los que se les solicita el acceso', 60 + halfWidth, 180);
+
+        // Contenidos
+        doc.rect(50, 200, halfWidth, sectionHeight).stroke();
+        doc.rect(50 + halfWidth, 200, halfWidth, sectionHeight).stroke();
+
+        reportNames.forEach((reportName, index) => {
+            doc.text(`${index + 1}. ${reportName}`, 60, 210 + index * 20);
+        });
+
+        requestedUserNames.forEach((userName, index) => {
+            doc.text(`${index + 1}. ${userName}@essalud.gob.pe`, 60 + halfWidth, 210 + index * 20);
+        });
+
+        // Dibujar cuadro para firmas digitales
+        doc.rect(50, doc.page.height - 145, doc.page.width - 100, 115).stroke();
+        doc.fontSize(9).text('Firmar digitalmente en esta sección', 50, doc.page.height - 140, { width: doc.page.width - 100, align: 'center' });
+
+        // Finalizar el documento PDF
+        doc.end();
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al crear la solicitud de acceso" });
     }
 };
-
-
-
 // Actualizar una solicitud de acceso existente sin el pdfBlob
 export const updateAccessRequest = async (req, res) => {
     const { id } = req.params;
-    const { justification, nombreJefe, area, UserId, StateId, ReportId } = req.body;
+    const { nombreSolicitante, UserId, StateId, requestedUserIds, ReportIds } = req.body;
+
     try {
         const accessRequest = await AccessRequest.findByPk(id);
+
         if (accessRequest) {
+            // Actualizar los campos de la solicitud de acceso
             await accessRequest.update({
-                justification,
-                nombreJefe,
-                area,
+                nombreSolicitante,
                 UserId,
-                StateId,
-                ReportId
+                StateId
             });
+
+            // Actualizar las asociaciones de reportes
+            if (ReportIds && Array.isArray(ReportIds)) {
+                const reports = await Report.findAll({
+                    where: {
+                        id: ReportIds
+                    }
+                });
+                await accessRequest.setReports(reports);
+            }
+
+            // Actualizar las asociaciones de usuarios solicitados
+            if (requestedUserIds && Array.isArray(requestedUserIds)) {
+                const users = await User.findAll({
+                    where: {
+                        id: requestedUserIds
+                    }
+                });
+                await accessRequest.setRequestedFor(users);
+            }
+
             res.json(accessRequest);
         } else {
             res.status(404).json({ message: "Solicitud de acceso no encontrada" });
@@ -96,54 +233,131 @@ export const updateAccessRequest = async (req, res) => {
     }
 };
 
-// Actualizar una solicitud de acceso existente sin el pdfBlob
+// Aprobar una solicitud de acceso existente y actualizar el estado a "APROBADO"
 export const approveAccessRequest = async (req, res) => {
     const { id } = req.params;
-    const { justification, nombreJefe, area, UserId, StateId } = req.body;
+
     try {
-        const accessRequest = await AccessRequest.findByPk(id);
-        if (accessRequest) {
-            await accessRequest.update({
-                justification,
-                nombreJefe,
-                area,
-                UserId,
-                StateId
-            });
-            await Notification.create({
-                UserId: UserId,
-                name: 'Respuesta de solicitud de acceso',
-                shortDescription: `Su solicitud de acceso a los reportes ha sido aprobada.`
-            });
-            res.json(accessRequest);
-        } else {
-            res.status(404).json({ message: "Solicitud de acceso no encontrada" });
+        const accessRequest = await AccessRequest.findByPk(id, {
+            include: [
+                { model: Report, through: { attributes: [] } }, // Incluir los reportes asociados
+                { model: User, as: 'RequestedFor', through: { attributes: [] } } // Incluir los usuarios solicitados
+            ]
+        });
+        if (!accessRequest) {
+            return res.status(404).json({ message: "Solicitud de acceso no encontrada" });
         }
+
+        // Buscar el estado "APROBADO"
+        const state = await State.findOne({
+            where: { name: 'APROBADO' }
+        });
+
+        if (!state) {
+            return res.status(404).json({ message: "Estado 'APROBADO' no encontrado" });
+        }
+
+        // Actualizar la solicitud de acceso
+        await accessRequest.update({
+            StateId: state.id
+        });
+
+        // Crear notificación para el solicitante
+        await Notification.create({
+            UserId: accessRequest.UserId, // Usuario solicitante
+            name: 'Respuesta de solicitud de acceso',
+            shortDescription: 'Su solicitud de acceso a los reportes ha sido aprobada.'
+        });
+
+        // Obtener los IDs de los usuarios y reportes asociados
+        const requestedUserIds = accessRequest.RequestedFor.map(user => user.id);
+        const reportIds = accessRequest.Reports.map(report => report.id);
+
+        // Asociar reportes a los usuarios solicitados
+        await associateReportsWithUsers(requestedUserIds, reportIds);
+
+        // Volver a cargar las asociaciones después de la actualización
+        await accessRequest.reload({
+            include: [
+                { model: Report, through: { attributes: [] } },
+                { model: User, as: 'RequestedFor', through: { attributes: [] } }
+            ]
+        });
+
+        res.json(accessRequest);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al actualizar la solicitud de acceso" });
     }
 };
+
+// Crear una relación usuario-reporte
+const associateReportsWithUsers = async (userIds, reportIds) => {
+    try {
+        if (!Array.isArray(userIds) || !Array.isArray(reportIds)) {
+            throw new TypeError('userIds y reportIds deben ser arrays');
+        }
+
+        for (const userId of userIds) {
+            const user = await User.findByPk(userId);
+            if (!user) {
+                console.warn(`Usuario con ID ${userId} no encontrado`);
+                continue;
+            }
+
+            for (const reportId of reportIds) {
+                const report = await Report.findByPk(reportId, { include: [Module] });
+                if (!report) {
+                    console.warn(`Reporte con ID ${reportId} no encontrado`);
+                    continue;
+                }
+
+                const existingRelation = await user.hasReport(report);
+                if (!existingRelation) {
+                    await user.addReport(report);
+                    await user.addModule(report.Module);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error al asociar reportes con usuarios:', error);
+        throw new Error('Error al asociar reportes con usuarios');
+    }
+};
+
 
 // Actualizar una solicitud de acceso existente sin el pdfBlob
 export const denyAccessRequest = async (req, res) => {
     const { id } = req.params;
-    const { justification, nombreJefe, area, UserId, StateId, ReportId } = req.body;
+
     try {
         const accessRequest = await AccessRequest.findByPk(id);
-        if (accessRequest) {
-            await accessRequest.update({
-                justification,
-                nombreJefe,
-                area,
-                UserId,
-                StateId,
-                ReportId
-            });
-            res.json(accessRequest);
-        } else {
-            res.status(404).json({ message: "Solicitud de acceso no encontrada" });
+        if (!accessRequest) {
+            return res.status(404).json({ message: "Solicitud de acceso no encontrada" });
         }
+
+        // Buscar el estado "APROBADO"
+        const state = await State.findOne({
+            where: { name: 'DENEGADO' }
+        });
+
+        if (!state) {
+            return res.status(404).json({ message: "Estado 'DENEGADO' no encontrado" });
+        }
+
+        // Actualizar la solicitud de acceso
+        await accessRequest.update({
+            StateId: state.id
+        });
+
+        // Crear notificación para el solicitante
+        await Notification.create({
+            UserId: accessRequest.UserId, // Usuario solicitante
+            name: 'Respuesta de solicitud de acceso',
+            shortDescription: 'Su solicitud de acceso a los reportes ha sido denegada.'
+        });
+
+        res.json(accessRequest);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al actualizar la solicitud de acceso" });

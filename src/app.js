@@ -15,6 +15,7 @@ import mainDependencyRouter from "./routes/maindependency.routes.js";
 import dependencyRouter from "./routes/dependency.routes.js";
 import PositionRouter from "./routes/position.routes.js";
 import RLRouter from "./routes/rl.routes.js";
+import StatesRouter from "./routes/states.routes.js";
 
 const app = express();
 createRoles();
@@ -41,5 +42,6 @@ app.use('/maindependency', mainDependencyRouter)
 app.use('/dependency', dependencyRouter)
 app.use('/rl', RLRouter)
 app.use('/position', PositionRouter)
+app.use('/state', StatesRouter)
 
 export default app;

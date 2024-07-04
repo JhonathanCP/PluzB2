@@ -188,21 +188,13 @@ export const Dependency = sequelize.define('Dependency', {
 
 // Definir el modelo AccessRequest
 export const AccessRequest = sequelize.define('AccessRequest', {
-    justification: {
+    nombreSolicitante: {
         type: DataTypes.STRING,
-        allowNull: false
-    },
-    nombreJefe: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    area: {
-        type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     pdfBlob: {
-        type: DataTypes.BLOB,
-        allowNull: true // Puedes ajustar esto según tus necesidades
+        type: DataTypes.BLOB('long'),
+        allowNull: true,
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -482,6 +474,15 @@ User.belongsToMany(Report, {
 Report.belongsToMany(User, {
     through: 'UserFavoriteReport',
     as: 'FavoritedBy'
+});
+
+User.belongsToMany(AccessRequest, {
+    through: 'UserReportRequested',
+    as: 'Request'
+});
+AccessRequest.belongsToMany(User, {
+    through: 'UserReportRequested',
+    as: 'RequestedFor'
 });
 
 AccessRequest.belongsToMany(Report, { through: 'AccessRequestReport' });

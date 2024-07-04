@@ -487,7 +487,7 @@ export const addFavorite = async (req, res) => {
 };
 
 export const removeFavorite = async (req, res) => {
-    const { userId, reportId } = req.body;
+    const { userId, reportId } = req.params;
     try {
         const user = await User.findByPk(userId);
         const report = await Report.findByPk(reportId);

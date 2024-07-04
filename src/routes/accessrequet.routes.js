@@ -1,13 +1,16 @@
 import { Router } from "express";
-import { uploadPdfMiddleware, getAllAccessRequests, getAccessRequestById, createAccessRequest, updateAccessRequest, deleteAccessRequest, uploadPdfForAccessRequest, getPdfById } from "../controllers/accessrequest.controller.js"
+import { approveAccessRequest, denyAccessRequest, getAccessRequestsByUser, uploadPdfMiddleware, getAllAccessRequests, getAccessRequestById, createAccessRequest, updateAccessRequest, deleteAccessRequest, uploadPdfForAccessRequest, getPdfById } from "../controllers/accessrequest.controller.js"
 import { verifyToken, isAdmin } from "../middlewares/authJwt.js";
 
 const accessRequestRouter = Router()
 
 accessRequestRouter.get('/', [verifyToken], getAllAccessRequests);
-accessRequestRouter.get('/:id', [verifyToken, isAdmin], getAccessRequestById);
+accessRequestRouter.get('/user/:userId', [verifyToken], getAccessRequestsByUser);
+accessRequestRouter.get('/:id', [verifyToken], getAccessRequestById);
 accessRequestRouter.post('/', [verifyToken], createAccessRequest);
 accessRequestRouter.put('/:id', [verifyToken, isAdmin],updateAccessRequest);
+accessRequestRouter.put('/:id/approve', [verifyToken, isAdmin],approveAccessRequest);
+accessRequestRouter.put('/:id/deny', [verifyToken, isAdmin],approveAccessRequest);
 accessRequestRouter.delete('/:id', [verifyToken],deleteAccessRequest);
 accessRequestRouter.post('/:id/pdf', [verifyToken], uploadPdfMiddleware, uploadPdfForAccessRequest);
 accessRequestRouter.get('/:id/pdf',  getPdfById);
