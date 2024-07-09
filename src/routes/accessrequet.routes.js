@@ -10,7 +10,7 @@ accessRequestRouter.get('/:id', [verifyToken], getAccessRequestById);
 accessRequestRouter.post('/', [verifyToken], createAccessRequest);
 accessRequestRouter.put('/:id', [verifyToken, isAdmin],updateAccessRequest);
 accessRequestRouter.put('/:id/approve', [verifyToken, isAdmin],approveAccessRequest);
-accessRequestRouter.put('/:id/deny', [verifyToken, isAdmin],approveAccessRequest);
+accessRequestRouter.put('/:id/deny', [verifyToken, isAdmin],denyAccessRequest);
 accessRequestRouter.delete('/:id', [verifyToken],deleteAccessRequest);
 accessRequestRouter.post('/:id/pdf', [verifyToken], uploadPdfMiddleware, uploadPdfForAccessRequest);
 accessRequestRouter.get('/:id/pdf',  getPdfById);
