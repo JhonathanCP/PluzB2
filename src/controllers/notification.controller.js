@@ -53,11 +53,14 @@ export const updateNotificationById = async (req, res) => {
     try {
         const notification = await Notification.findByPk(id);
         if (notification) {
-            const { name, description, link } = req.body;
+            const { name, description, link, opened, hidden, openedAt } = req.body;
             await notification.update({
                 name: name || notification.name,
                 description: description || notification.description,
-                link: link || notification.link
+                link: link || notification.link,
+                opened: opened || notification.opened,
+                hidden: hidden || notification.hidden,
+                openedAt: openedAt || notification.openedAt
             });
             res.json({ notification });
         } else {

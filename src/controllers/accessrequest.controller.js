@@ -115,6 +115,14 @@ export const createAccessRequest = async (req, res) => {
             requestedUserNames = users.map(user => user.username);
         }
 
+        // Crear notificación para el solicitante
+        await Notification.create({
+            UserId: UserId, // Usuario solicitante
+            name: 'Envío de solicitud de acceso',
+            shortDescription: 'Su solicitud de acceso ha sido creada, por favor firmarlo digitalmente.',
+            link: '/user-requests'
+        });
+
         // Crear un nuevo documento PDF con pdfkit
         const doc = new PDFDocument({ layout: 'landscape' });
         let buffers = [];
@@ -266,7 +274,8 @@ export const approveAccessRequest = async (req, res) => {
         await Notification.create({
             UserId: accessRequest.UserId, // Usuario solicitante
             name: 'Respuesta de solicitud de acceso',
-            shortDescription: 'Su solicitud de acceso a los reportes ha sido aprobada.'
+            shortDescription: 'Su solicitud de acceso a los reportes ha sido aprobada.',
+            link: '/user-requests'
         });
 
         // Obtener los IDs de los usuarios y reportes asociados
@@ -354,7 +363,8 @@ export const denyAccessRequest = async (req, res) => {
         await Notification.create({
             UserId: accessRequest.UserId, // Usuario solicitante
             name: 'Respuesta de solicitud de acceso',
-            shortDescription: 'Su solicitud de acceso a los reportes ha sido denegada.'
+            shortDescription: 'Su solicitud de acceso a los reportes ha sido denegada.',
+            link: '/user-requests'
         });
 
         res.json(accessRequest);
@@ -394,6 +404,13 @@ export const uploadPdfForAccessRequest = async (req, res) => {
         // Actualizar el estado de la solicitud al estado "POR REVISAR"
         accessRequest.StateId = reviewState.id;
         accessRequest.pdfBlob = pdfBlob
+
+        await Notification.create({
+            UserId: accessRequest.UserId, // Usuario solicitante
+            name: 'Envío de solicitud de acceso',
+            shortDescription: 'Su solicitud de acceso ha sido actualizada con su firma, pronto tendrá una respuesta.',
+            link: '/user-requests'
+        });
 
         // Guardar los cambios en la base de datos
         await accessRequest.save();

@@ -4,10 +4,10 @@ import { verifyToken, isAdmin } from "../middlewares/authJwt.js";
 
 const notificationRouter = Router()
 
-notificationRouter.get('/user/:id', [verifyToken, isAdmin], getAllNotificationsByUser);
-notificationRouter.get('/:id', [verifyToken, isAdmin], getNotificationById);
-notificationRouter.post('/', [verifyToken, isAdmin], createNotification);
-notificationRouter.put('/:id', [verifyToken, isAdmin],updateNotificationById);
-notificationRouter.delete('/:id', [verifyToken, isAdmin],deleteNotificationById);
+notificationRouter.get('/user/:id', [verifyToken], getAllNotificationsByUser);
+notificationRouter.get('/:id', [verifyToken], getNotificationById);
+notificationRouter.post('/', [verifyToken], createNotification);
+notificationRouter.put('/:id', [verifyToken],updateNotificationById);
+notificationRouter.delete('/:id', [verifyToken],deleteNotificationById);
 
 export default notificationRouter;

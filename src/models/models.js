@@ -382,6 +382,10 @@ export const Notification = sequelize.define('Notification', {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
+    hidden: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     openedAt: {
         type: DataTypes.DATE,
         onUpdate: DataTypes.NOW
