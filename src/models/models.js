@@ -331,7 +331,7 @@ export const Report = sequelize.define('Report', {
     },
     icon: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     link: {
         type: DataTypes.STRING,
