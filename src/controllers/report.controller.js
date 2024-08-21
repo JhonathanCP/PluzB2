@@ -44,6 +44,7 @@ export const createReport = async (req, res) => {
             createdAt
         });
 
+        const module = await Module.findByPk(ModuleId);
         // Notificar a todos los usuarios que tienen permiso en el ModuleId
         const usersWithPermission = await User.findAll({
             include: {
@@ -55,8 +56,8 @@ export const createReport = async (req, res) => {
         const notificationPromises = usersWithPermission.map(async (user) => {
             await Notification.create({
                 UserId: user.id,
-                name: 'Nuevo reporte',
-                shortDescription: `Nuevo reporte ${name} creado en el módulo ${ModuleId}`,
+                name: 'Nuevo tablero',
+                shortDescription: `Nuevo tablero ${name} creado en el módulo ${module.name}`,
                 description: description
             });
         });
@@ -101,12 +102,12 @@ export const updateReport = async (req, res) => {
                 createdAt, // Permitir actualización manual
                 updatedAt  // Permitir actualización manual
             });
-
+            const module = await Module.findByPk(TempModuleId);
             const notificationPromises = usersWithPermission.map(async (user) => {
                 await Notification.create({
                     UserId: user.id,
-                    name: 'Cambios en reporte',
-                    shortDescription: `El reporte ${TempName} ha sido actualizado en el módulo ${TempModuleId}`
+                    name: `Cambios en tablero: ${TempName}`,
+                    shortDescription: `El tablero ${TempName} ha sido actualizado en el módulo ${module.name}`
                 });
             });
 
