@@ -1,22 +1,14 @@
-import { Router } from "express";
-import { createUser, getUserById, updateUser, getAllUsers, getModulesByUser, getReportsByUser, addAllData, createUserModule, createUserReport, deleteUserModule, deleteUserReport, addFavorite, getFavorites, removeFavorite } from "../controllers/user.controller.js"
+import { Router } from 'express';
+import { createUser, getAllUsers, getUserById, updateUser, deleteUser } from '../controllers/user.controller.js';
 import { verifyToken, isAdmin } from "../middlewares/authJwt.js";
 
-const userRouter = Router()
+const userRouter = Router();
 
-userRouter.get('/', [verifyToken], getAllUsers);
-userRouter.get('/:id', [verifyToken], getUserById);
-userRouter.put('/:id', [verifyToken], updateUser);
-userRouter.get('/:id/get-modules', [verifyToken], getModulesByUser);
-userRouter.get('/:id/get-reports', [verifyToken], getReportsByUser);
-userRouter.post('/', [verifyToken, isAdmin], createUser);
-userRouter.post('/favorites', [verifyToken], addFavorite);
-userRouter.delete('/:userId/favorites/:reportId', [verifyToken], removeFavorite);
-userRouter.get('/favorites/:id', [verifyToken], getFavorites);
-userRouter.post('/:id/add-all', [verifyToken, isAdmin], addAllData);
-userRouter.post('/add-module', [verifyToken, isAdmin], createUserModule);
-userRouter.post('/add-report', [verifyToken, isAdmin], createUserReport);
-userRouter.delete('/delete-module', [verifyToken, isAdmin], deleteUserModule);
-userRouter.delete('/:userId/delete-report/:reportId', [verifyToken, isAdmin], deleteUserReport);
+// Rutas para las operaciones CRUD
+userRouter.post('/',[verifyToken, isAdmin], createUser);         // Crear un nuevo usuario
+userRouter.get('/',[verifyToken, isAdmin], getAllUsers);         // Obtener todos los usuarios
+userRouter.get('/:id',[verifyToken, isAdmin], getUserById);      // Obtener un usuario por su ID
+userRouter.put('/:id',[verifyToken, isAdmin], updateUser);       // Actualizar un usuario por su ID
+userRouter.delete('/:id',[verifyToken, isAdmin], deleteUser);    // Eliminar un usuario por su ID
 
 export default userRouter;
