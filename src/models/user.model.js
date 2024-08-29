@@ -4,7 +4,7 @@ import { sequelize } from '../database/database.js';
 import bcrypt from "bcryptjs";
 
 // Definir el modelo User
-export const User = sequelize.define('User', {
+export const User = sequelize.define('user', {
     username: {
         type: DataTypes.STRING,
         allowNull: false

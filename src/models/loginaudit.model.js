@@ -2,7 +2,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../database/database.js';
 
-export const LoginAudit = sequelize.define('LoginAudit', {
+export const LoginAudit = sequelize.define('login_audit', {
     createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

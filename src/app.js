@@ -5,6 +5,9 @@ import helmet from "helmet";
 import { createRoles, createAdmin } from "./middlewares/initialSetup.js"
 import authRouter from "./routes/auth.routes.js"
 import userRouter from "./routes/user.routes.js"
+import clientRouter from "./routes/client.routes.js";
+import groupRouter from "./routes/group.routes.js";
+import sectionRouter from "./routes/section.routes.js";
 
 const app = express();
 createRoles();
@@ -21,5 +24,8 @@ app.use(morgan('dev'));
 
 app.use('/auth', authRouter)
 app.use('/user', userRouter)
+app.use('/client', clientRouter)
+app.use('/group', groupRouter)
+app.use('/section', sectionRouter)
 
 export default app;
