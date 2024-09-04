@@ -4,8 +4,8 @@ import { Client } from '../models/client.model.js';
 // Crear un nuevo grupo
 export const createGroup = async (req, res) => {
     try {
-        const { name, description, active } = req.body;
-        const group = await Group.create({ name, description, active });
+        const { name, description, icon, active } = req.body;
+        const group = await Group.create({ name, description, icon, active });
         res.status(201).json(group);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -15,13 +15,7 @@ export const createGroup = async (req, res) => {
 // Obtener todos los grupos
 export const getAllGroups = async (req, res) => {
     try {
-        const groups = await Group.findAll({
-            include: {
-                model: Client,
-                as: 'clients',
-                attributes: ['name', 'description']
-            }
-        });
+        const groups = await Group.findAll();
         res.status(200).json(groups);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -32,13 +26,7 @@ export const getAllGroups = async (req, res) => {
 export const getGroupById = async (req, res) => {
     try {
         const { id } = req.params;
-        const group = await Group.findByPk(id, {
-            include: {
-                model: Client,
-                as: 'clients',
-                attributes: ['name', 'description']
-            }
-        });
+        const group = await Group.findByPk(id);
 
         if (!group) {
             return res.status(404).json({ message: "Group not found" });
@@ -54,14 +42,14 @@ export const getGroupById = async (req, res) => {
 export const updateGroup = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, active } = req.body;
+        const { name, description, icon, active } = req.body;
 
         const group = await Group.findByPk(id);
         if (!group) {
             return res.status(404).json({ message: "Group not found" });
         }
 
-        await group.update({ name, description, active });
+        await group.update({ name, description, icon, active });
         res.status(200).json(group);
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -8,6 +8,8 @@ import userRouter from "./routes/user.routes.js"
 import clientRouter from "./routes/client.routes.js";
 import groupRouter from "./routes/group.routes.js";
 import sectionRouter from "./routes/section.routes.js";
+import sectionTypeRouter from "./routes/sectiontype.routes.js";
+import locationRouter from "./routes/location.routes.js";
 
 const app = express();
 createRoles();
@@ -27,5 +29,7 @@ app.use('/user', userRouter)
 app.use('/client', clientRouter)
 app.use('/group', groupRouter)
 app.use('/section', sectionRouter)
+app.use('/sectiontype', sectionTypeRouter)
+app.use('/location', locationRouter)
 
 export default app;

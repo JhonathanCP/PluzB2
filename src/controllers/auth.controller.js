@@ -51,7 +51,7 @@ export const signinHandler = async (req, res) => {
                     publicIp,
                     privateIp,
                     system,
-                    UserId: userFound.id
+                    userId: userFound.id
                 });
 
                 return res.status(200).json({ token });
@@ -62,7 +62,7 @@ export const signinHandler = async (req, res) => {
                     publicIp,
                     privateIp,
                     system,
-                    UserId: userFound.id
+                    userId: userFound.id
                 });
 
                 return res.status(401).json({ message: "Contraseña incorrecta" });
@@ -79,7 +79,7 @@ export const signinHandler = async (req, res) => {
             publicIp,
             privateIp,
             system,
-            UserId: null
+            userId: null
         });
 
         return res.status(500).json({ message: "Internal Server Error" });

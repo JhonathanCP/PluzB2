@@ -3,24 +3,16 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../database/database.js';
 
 // Definir el modelo Role
-export const Section = sequelize.define('section', {
+export const Location = sequelize.define('location', {
     name: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    percepcion: {
-        type: DataTypes.FLOAT,
-        allowNull: false
-    },
-    kpiname: {
+    code: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    kpireferencia: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    kpivalue: {
+    responsible: {
         type: DataTypes.STRING,
         allowNull: false
     },

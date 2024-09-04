@@ -8,6 +8,10 @@ export const Client = sequelize.define('client', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    responsible: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     description: {
         type: DataTypes.STRING,
         allowNull: false

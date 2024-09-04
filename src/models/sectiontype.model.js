@@ -3,16 +3,8 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../database/database.js';
 
 // Definir el modelo Role
-export const Group = sequelize.define('group', {
+export const SectionType = sequelize.define('section_type', {
     name: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    description: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    icon: {
         type: DataTypes.STRING,
         allowNull: false
     },
