@@ -41,7 +41,7 @@ export const signinHandler = async (req, res) => {
         if (userFound) {
             const matchPassword = await userFound.comparePassword(password);
             if (matchPassword) {
-                const token = jwt.sign({ id: userFound.id, username: userFound.username, role: userFound.RoleId }, SECRET, {
+                const token = jwt.sign({ id: userFound.id, username: userFound.username, role: userFound.roleId }, SECRET, {
                     expiresIn: "7200s" // 2 hours
                 });
 

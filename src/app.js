@@ -10,6 +10,7 @@ import groupRouter from "./routes/group.routes.js";
 import sectionRouter from "./routes/section.routes.js";
 import sectionTypeRouter from "./routes/sectiontype.routes.js";
 import locationRouter from "./routes/location.routes.js";
+import roleRouter from "./routes/role.routes.js";
 
 const app = express();
 createRoles();
@@ -25,6 +26,7 @@ app.use(helmet());
 app.use(morgan('dev'));
 
 app.use('/auth', authRouter)
+app.use('/role', roleRouter)
 app.use('/user', userRouter)
 app.use('/client', clientRouter)
 app.use('/group', groupRouter)
