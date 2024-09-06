@@ -1,10 +1,41 @@
 import { User } from '../models/user.model.js';
 import { Role } from '../models/role.model.js';
+import nodemailer from 'nodemailer';
+import passwordGenerator from 'generate-password';
+import { EMAIL_USER, EMAIL_PASSWORD } from "../config.js";
 
-// Crear un nuevo usuario
+// Configuración de nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'Outlook', // o tu servicio de correo preferido
+    auth: {
+        user: EMAIL_USER, // tu email
+        pass: EMAIL_PASSWORD, // tu contraseña de email
+    },
+});
+
+// Función para enviar correo
+const sendEmail = async (email, username, password) => {
+    const mailOptions = {
+        from: EMAIL_USER,
+        to: email,
+        subject: 'Bienvenido - Tus credenciales de acceso',
+        text: `Hola ${username},\n\nTus credenciales son las siguientes:\n\nUsuario: ${email}\nContraseña: ${password}\n\nPor favor, cambia tu contraseña después de iniciar sesión.`,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Correo enviado a:', email);
+    } catch (error) {
+        console.log('Error enviando el correo:', error);
+    }
+};
+
+// Crear un nuevo usuario con contraseña autogenerada y envío de correo
 export const createUser = async (req, res) => {
     try {
-        const { username, email, password, roleId } = req.body;
+        const { username, email, roleId } = req.body;
+
+        const lowercaseUsername = username.toLowerCase();
 
         // Verifica si el rol existe
         const role = await Role.findByPk(roleId);
@@ -12,13 +43,27 @@ export const createUser = async (req, res) => {
             return res.status(400).json({ message: "Role not found" });
         }
 
-        // Crea el usuario
-        const user = await User.create({ username, email, password, roleId });
+        // Generar una contraseña segura
+        const password = passwordGenerator.generate({
+            length: 10,
+            numbers: true,
+            uppercase: true,
+            lowercase: true,
+            symbols: false, // opcional si deseas incluir símbolos
+        });
+
+        // Crea el usuario con la contraseña generada
+        const user = await User.create({ username: lowercaseUsername, email, password, roleId });
+
+        // Envía el correo con las credenciales
+        await sendEmail(email, username, password);
+
         res.status(201).json(user);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // Obtener todos los usuarios
 export const getAllUsers = async (req, res) => {

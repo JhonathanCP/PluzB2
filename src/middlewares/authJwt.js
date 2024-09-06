@@ -28,7 +28,7 @@ export const isAdmin = async (req, res, next) => {
         const user = await User.findByPk(req.userId);
         const role = await user.getRole();
 
-        if (role.name === "admin") {
+        if (role.id === 1) {
             next();
             return;
         }

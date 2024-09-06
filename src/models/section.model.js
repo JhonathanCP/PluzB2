@@ -12,18 +12,6 @@ export const Section = sequelize.define('section', {
         type: DataTypes.FLOAT,
         allowNull: false
     },
-    kpiname: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    kpireferencia: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    kpivalue: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
