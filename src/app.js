@@ -16,7 +16,6 @@ const app = express();
 createRoles();
 createAdmin();
 
-
 app.use(
     cors()
 );
