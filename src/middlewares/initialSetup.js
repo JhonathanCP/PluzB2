@@ -12,8 +12,8 @@ export const createRoles = async () => {
 
         // Create default Roles
         const values = await Promise.all([
-            Role.create({ name: "admin" }),
-            Role.create({ name: "user" })
+            Role.create({ name: "ADMINISTRADOR" }),
+            Role.create({ name: "USUARIO" })
         ]);
 
         console.log(values);
