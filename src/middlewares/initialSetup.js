@@ -34,7 +34,7 @@ export const createAdmin = async () => {
         }
 
         // Get the 'admin' role
-        const adminRole = await Role.findOne({ where: { name: 'admin' } });
+        const adminRole = await Role.findOne({ where: { name: 'ADMINISTRADOR' } });
 
         // Create a new admin user
         const newUser = await User.create({

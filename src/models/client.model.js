@@ -12,10 +12,10 @@ export const Client = sequelize.define('client', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    description: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
+    // description: {
+    //     type: DataTypes.STRING,
+    //     allowNull: false
+    // },
     active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true

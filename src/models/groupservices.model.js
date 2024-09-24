@@ -1,24 +1,16 @@
-// Importar Sequelize
+//CREAR SERVICIOS POR GRUPO// Importar Sequelize
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../database/database.js';
 
 // Definir el modelo Role
-export const Location = sequelize.define('location', {
+export const GroupServices = sequelize.define('group_services', {
     name: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    code: {
+    description: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    responsible: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    political_party: {
-        type: DataTypes.STRING,
-        allowNull: true
     },
     active: {
         type: DataTypes.BOOLEAN,

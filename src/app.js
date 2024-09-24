@@ -11,6 +11,8 @@ import sectionRouter from "./routes/section.routes.js";
 import sectionTypeRouter from "./routes/sectiontype.routes.js";
 import locationRouter from "./routes/location.routes.js";
 import roleRouter from "./routes/role.routes.js";
+import groupServicesRouter from "./routes/groupservices.routes.js";
+import serviceSectionRouter from "./routes/servicesection.routes.js";
 
 const app = express();
 createRoles();
@@ -32,5 +34,7 @@ app.use('/group', groupRouter)
 app.use('/section', sectionRouter)
 app.use('/sectiontype', sectionTypeRouter)
 app.use('/location', locationRouter)
+app.use('/group-services', groupServicesRouter)
+app.use('/service-section', serviceSectionRouter)
 
 export default app;

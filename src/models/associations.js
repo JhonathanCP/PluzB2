@@ -6,6 +6,8 @@ import { Client } from "./client.model.js";
 import { Location } from "./location.model.js";
 import { Section } from "./section.model.js";
 import { SectionType } from "./sectiontype.model.js";
+import { GroupServices } from "./groupservices.model.js";
+import { ServiceSection } from "./servicesection.model.js";
 
 // Definir la relación uno a muchos: Un rol tiene muchos usuarios, pero un usuario tiene solo un rol
 Role.hasMany(User, {
@@ -22,6 +24,15 @@ User.hasMany(LoginAudit);
 
 Client.belongsTo(Group);
 Group.hasMany(Client);
+
+GroupServices.belongsTo(Group);
+Group.hasMany(GroupServices);
+
+ServiceSection.belongsTo(GroupServices);
+GroupServices.hasMany(ServiceSection);
+
+ServiceSection.belongsTo(SectionType);
+SectionType.hasMany(ServiceSection);
 
 Client.belongsTo(Location);
 Location.hasMany(Client);

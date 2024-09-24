@@ -5,14 +5,14 @@ import { Section } from '../models/section.model.js';
 // Crear un nuevo cliente
 export const createClient = async (req, res) => {
     try {
-        const { name, description, responsible, active, groupId } = req.body;
+        const { name, description, responsible, active, groupId, locationId } = req.body;
 
         const group = await Group.findByPk(groupId);
         if (!group) {
             return res.status(400).json({ message: "Group not found" });
         }
 
-        const client = await Client.create({ name, description, responsible, active, groupId });
+        const client = await Client.create({ name, description, responsible, active, groupId, locationId });
         res.status(201).json(client);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -49,7 +49,7 @@ export const getClientById = async (req, res) => {
 export const updateClient = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, responsible, active, groupId } = req.body;
+        const { name, description, responsible, active, groupId, locationId } = req.body;
 
         const client = await Client.findByPk(id);
         if (!client) {
@@ -63,7 +63,7 @@ export const updateClient = async (req, res) => {
             }
         }
 
-        await client.update({ name, description, responsible, active, groupId });
+        await client.update({ name, description, responsible, active, groupId, locationId });
         res.status(200).json(client);
     } catch (error) {
         res.status(500).json({ message: error.message });
