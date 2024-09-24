@@ -28,11 +28,26 @@ Group.hasMany(Client);
 GroupServices.belongsTo(Group);
 Group.hasMany(GroupServices);
 
-ServiceSection.belongsTo(GroupServices);
-GroupServices.hasMany(ServiceSection);
+ServiceSection.belongsTo(GroupServices, {
+    foreignKey: 'groupServiceId',
+    as: 'groupService' // Cambiar 'group-service' a 'groupService'
+});
 
-ServiceSection.belongsTo(SectionType);
-SectionType.hasMany(ServiceSection);
+GroupServices.hasMany(ServiceSection, {
+    foreignKey: 'groupServiceId',
+    as: 'serviceSections' // Cambiar 'service-section' a 'serviceSections'
+});
+
+ServiceSection.belongsTo(SectionType, {
+    foreignKey: 'sectionTypeId',
+    as: 'sectionType' // Cambiar 'section-type' a 'sectionType'
+});
+
+SectionType.hasMany(ServiceSection, {
+    foreignKey: 'sectionTypeId',
+    as: 'serviceSections' // Cambiar 'service-section' a 'serviceSections'
+});
+
 
 Client.belongsTo(Location);
 Location.hasMany(Client);

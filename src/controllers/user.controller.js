@@ -18,8 +18,8 @@ const sendEmail = async (email, username, password) => {
     const mailOptions = {
         from: EMAIL_USER,
         to: email,
-        subject: 'Bienvenido - Tus credenciales de acceso',
-        text: `Hola ${username},\n\nTus credenciales son las siguientes:\n\nUsuario: ${email}\nContraseña: ${password}\n\nPor favor, cambia tu contraseña después de iniciar sesión.`,
+        subject: 'Credenciales de acceso - Buyer Profile',
+        text: `Hola ${username},\n\nTus credenciales son:\n\nUsuario: ${email}\nContraseña: ${password}\n\nPor favor, cambia tu contraseña después de iniciar sesión.`,
     };
 
     try {
@@ -43,6 +43,17 @@ export const createUser = async (req, res) => {
             return res.status(400).json({ message: "Role not found" });
         }
 
+        // Verificar si el correo o el nombre de usuario ya existen
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ message: "Email ya está en uso" });
+        }
+
+        const existingUsername = await User.findOne({ where: { username: lowercaseUsername } });
+        if (existingUsername) {
+            return res.status(400).json({ message: "Usuario ya está en uso" });
+        }
+
         // Generar una contraseña segura
         const password = passwordGenerator.generate({
             length: 10,
@@ -63,7 +74,6 @@ export const createUser = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
 
 // Obtener todos los usuarios
 export const getAllUsers = async (req, res) => {
@@ -109,6 +119,26 @@ export const updateUser = async (req, res) => {
             if (!role) {
                 return res.status(400).json({ message: "Role not found" });
             }
+        }
+
+        // Verificar si el email o username ya existen en otro usuario
+        if (email && email !== user.email) {
+            const existingUser = await User.findOne({ where: { email } });
+            if (existingUser) {
+                return res.status(400).json({ message: "Email already in use" });
+            }
+        }
+
+        if (username && username.toLowerCase() !== user.username) {
+            const existingUsername = await User.findOne({ where: { username: username.toLowerCase() } });
+            if (existingUsername) {
+                return res.status(400).json({ message: "Username already in use" });
+            }
+        }
+
+        // Si la contraseña cambia, enviar correo con la nueva contraseña
+        if (password) {
+            await sendEmail(user.email, user.username, password);
         }
 
         // Actualiza el usuario
