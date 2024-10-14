@@ -13,6 +13,8 @@ import locationRouter from "./routes/location.routes.js";
 import roleRouter from "./routes/role.routes.js";
 import groupServicesRouter from "./routes/groupservices.routes.js";
 import serviceSectionRouter from "./routes/servicesection.routes.js";
+import serviceProfileRouter from "./routes/serviceprofile.routes.js";
+import dataRouter from "./routes/data.routes.js";
 
 const app = express();
 createRoles();
@@ -36,5 +38,7 @@ app.use('/sectiontype', sectionTypeRouter)
 app.use('/location', locationRouter)
 app.use('/group-services', groupServicesRouter)
 app.use('/service-section', serviceSectionRouter)
+app.use('/service-profile', serviceProfileRouter)
+app.use('/data', dataRouter)
 
 export default app;

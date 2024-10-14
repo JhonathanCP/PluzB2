@@ -12,10 +12,26 @@ export const Client = sequelize.define('client', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    // description: {
-    //     type: DataTypes.STRING,
-    //     allowNull: false
-    // },
+    dob: {
+        type:DataTypes.DATEONLY,
+        allowNull: false
+    },
+    politicalParty: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    ocupation: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    approvalRate: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    link: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
     active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true

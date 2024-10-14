@@ -8,6 +8,8 @@ import { Section } from "./section.model.js";
 import { SectionType } from "./sectiontype.model.js";
 import { GroupServices } from "./groupservices.model.js";
 import { ServiceSection } from "./servicesection.model.js";
+import { ServiceProfile } from "./serviceprofile.model.js";
+import { OldData, NewData } from "./data.model.js";
 
 // Definir la relación uno a muchos: Un rol tiene muchos usuarios, pero un usuario tiene solo un rol
 Role.hasMany(User, {
@@ -48,6 +50,15 @@ SectionType.hasMany(ServiceSection, {
     as: 'serviceSections' // Cambiar 'service-section' a 'serviceSections'
 });
 
+ServiceProfile.belongsTo(GroupServices, {
+    foreignKey: 'groupServiceId',
+    as: 'groupService' // Cambiar 'section-type' a 'sectionType'
+});
+
+GroupServices.hasMany(ServiceProfile, {
+    foreignKey: 'groupServiceId',
+    as: 'serviceProfiles' // Cambiar 'service-section' a 'serviceSections'
+});
 
 Client.belongsTo(Location);
 Location.hasMany(Client);
@@ -57,3 +68,18 @@ Client.hasMany(Section);
 
 Section.belongsTo(SectionType);
 SectionType.hasMany(Section);
+
+// Crear una tabla intermedia llamada 'ClientGroupService' para la relación de muchos a muchos
+GroupServices.belongsToMany(Client, {
+    through: 'client_service', // Nombre de la tabla intermedia
+    foreignKey: 'groupServiceId',   // Clave foránea hacia GroupServices
+    otherKey: 'clientId',           // Clave foránea hacia Client
+    as: 'clients'
+});
+
+Client.belongsToMany(GroupServices, {
+    through: 'client_service',  // Nombre de la tabla intermedia
+    foreignKey: 'clientId',         // Clave foránea hacia Client
+    otherKey: 'groupServiceId',     // Clave foránea hacia GroupServices
+    as: 'groupServices'
+});

@@ -3,16 +3,12 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../database/database.js';
 
 // Definir el modelo Role
-export const Location = sequelize.define('location', {
+export const ServiceProfile = sequelize.define('service_profile', {
     name: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    code: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    responsible: {
+    description: {
         type: DataTypes.STRING,
         allowNull: false
     },
